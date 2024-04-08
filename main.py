@@ -7,14 +7,10 @@ import sys
 
 
 def get_actual_date_in_utc() -> str:
-    date = datetime.now()
-    date = date.strftime("%Y-%m-%d")
-    logging.debug(f"{date=}")
-    return date
+    return str(datetime.now().date())
 
 
 def get_image_url_from_api(api: str, date: str, time: str) -> str:
-    """od 14:00 do 14:29 pobiera zdjecie dla godziny 14, a od 14:30 do 14:59 pobiera dla godziny 15"""
     if len(time) < 2:
         time = "0" + time
     endpoint = f"{api}/{date}T{time}:00"
@@ -37,10 +33,9 @@ class HoursError(Exception):
 
 
 def get_filepath(date: str, time: str) -> str:
-    download_dir = path.join(environ.get('HOMEPATH'), 'Downloads')
+    download_dir = path.abspath(path.join(environ.get('HOMEPATH'), 'Downloads'))
     filename = f"{date}T0{time}L.jpg" if len(str(time)) < 2 else f"{date}T{time}L.jpg"
-    # filepath = path.join(path.dirname(__file__), filename)
-    filepath = path.join(path.dirname(download_dir), filename)
+    filepath = path.join(download_dir, filename)
     logging.debug(f"{filepath=}")
     return filepath
 
@@ -70,6 +65,6 @@ if __name__ == "__main__":
             print("Endpoint not found!")
         except KeyboardInterrupt:
             sys.exit("Program stopped by user.")
-        # except urllib.error.URLError:
-        #     sys.exit("API not found! Check API URL or network connection.")
+        except urllib.error.URLError:
+            sys.exit("Connection timeout! API did not respond! Check API URL or network connection!")
     print("Done.")
