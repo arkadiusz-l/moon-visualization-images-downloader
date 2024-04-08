@@ -6,7 +6,7 @@ from os import path, environ
 import sys
 
 
-def get_actual_date_in_utc() -> str:
+def get_current_date_in_utc() -> str:
     return str(datetime.now().date())
 
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
             if start > end:
                 raise HoursError
 
-            today = get_actual_date_in_utc()
+            today = get_current_date_in_utc()
 
             for hour in range(start, end + 1):
                 hour = str(hour)
