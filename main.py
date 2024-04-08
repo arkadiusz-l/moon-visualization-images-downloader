@@ -82,4 +82,7 @@ if __name__ == "__main__":
             print("The hour of the first Moon visualization image should be earlier then the last.")
         except urllib.error.HTTPError:
             print("Endpoint not found!")
+        except KeyboardInterrupt:
+            print("Program stopped by user.")
+            exit()
     print("Done.")
