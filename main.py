@@ -4,12 +4,6 @@ from datetime import datetime
 import logging
 
 
-# def get_actual_time_in_utc() -> str:
-#     time = datetime.utcnow()
-#     time = time.strftime("%Y-%m-%dT%H:%M")
-#     return time
-
-
 def get_actual_date_in_utc() -> str:
     date = datetime.now()
     date = date.strftime("%Y-%m-%d")
@@ -23,6 +17,8 @@ def get_image_url_from_api(api: str, date: str, time: str) -> str:
     #     time = "00"
     # if time == "1":
     #     time = "01"
+    if len(time) < 2:
+        time = "0" + time
     endpoint = f"{api}/{date}T{time}:00"
     logging.debug(f"{endpoint=}")
     response = urllib.request.urlopen(endpoint)
@@ -58,6 +54,10 @@ class HoursError(Exception):
 #     12: "12"
 # }
 
+def set_filename(date: str, time: str):
+    return f"{today}T0{hour}L.jpg" if len(str(hour)) < 2 else f"{today}T{hour}L.jpg"  # T zeby odroznic date od czasu a L oznacza Local - czas lokalny (nie UTC)
+    # return f"{today}T{hour}L.tif"  # T zeby odroznic date od czasu a L oznacza Local - czas lokalny (nie UTC)
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -70,10 +70,9 @@ if __name__ == "__main__":
 
             today = get_actual_date_in_utc()
 
-            for hour in range(int(start), int(end) + 1):
+            for hour in range(start, end + 1):
                 image_url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=today, time=str(hour))
-                filename = f"{today}T{hour}L.jpg"  # T zeby odroznic date od czasu a L oznacza Local - czas lokalny (nie UTC)
-                # filename = f"{today}T{hour}L.tif"  # T zeby odroznic date od czasu a L oznacza Local - czas lokalny (nie UTC)
+                filename = set_filename(date=today, time=str(hour))
                 download_image(url=image_url, filename=filename)
             break
         except ValueError:
