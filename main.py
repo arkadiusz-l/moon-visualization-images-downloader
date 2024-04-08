@@ -32,9 +32,8 @@ class HoursError(Exception):
     pass
 
 
-def get_filepath(date: str, time: str) -> str:
-    download_dir = path.abspath(path.join(environ.get('HOMEPATH'), 'Downloads'))
-    filename = f"{date}T0{time}L.jpg" if len(str(time)) < 2 else f"{date}T{time}L.jpg"
+def get_filepath(download_dir: str, date: str, time: str) -> str:
+    filename = f"{date}T0{time}L.jpg" if len(time) < 2 else f"{date}T{time}L.jpg"
     filepath = path.join(download_dir, filename)
     logging.debug(f"{filepath=}")
     return filepath
@@ -54,7 +53,11 @@ if __name__ == "__main__":
             for hour in range(start, end + 1):
                 hour = str(hour)
                 image_url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=today, time=hour)
-                filepath = get_filepath(date=today, time=hour)
+                filepath = get_filepath(
+                    download_dir=path.abspath(path.join(environ.get("HOMEPATH"), "Downloads", "Moon Phases")),
+                    date=today,
+                    time=hour
+                )
                 download_image(url=image_url, path=filepath)
             break
         except ValueError:
