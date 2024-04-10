@@ -1,9 +1,8 @@
 import json
-from datetime import datetime, timedelta
 import logging
-import re
 import os
 import sys
+from datetime import datetime, timedelta
 import requests
 
 
