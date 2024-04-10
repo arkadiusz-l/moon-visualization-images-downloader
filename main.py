@@ -31,14 +31,12 @@ def get_date_in_utc(date: str) -> str:
 
 
 def get_image_url_from_api(api: str, date: str, hour: str) -> str:
-    if len(hour) < 2:
-        hour = "0" + hour
+    hour = "0" + hour if len(hour) < 2 else hour
     endpoint = f"{api}/{date}T{hour}:00"
     logging.debug(f"{endpoint=}")
     response = requests.get(endpoint)
     image_url = json.loads(response.content)
     image_url = image_url["image"]["url"]
-    # result = result["image_highres"]["url"]
     logging.debug(f"{image_url=}")
     return image_url
 
