@@ -1,7 +1,7 @@
-import json
-import logging
 import os
 import sys
+import json
+import logging
 from datetime import datetime, timedelta
 import requests
 
@@ -26,6 +26,8 @@ def get_date_in_utc(date: str) -> str:
         return str(datetime.now().date())
     elif date == "tm":
         return str(datetime.now().date() + timedelta(days=1))
+    elif len(date) <= 3 and date.startswith("+"):
+        return str(datetime.now().date() + timedelta(days=int(date[1:])))
     elif bool(datetime.strptime(date, "%Y-%m-%d")):
         return date
 
@@ -70,7 +72,9 @@ if __name__ == "__main__":
         while True:
             try:
                 date = input(
-                    "Enter the date for which I should download images (YYYY-MM-DD or 't' for Today, 'tm' for Tommorow): "
+                    "Enter the date for which I should download images.\n"
+                    "You can enter YYYY-MM-DD or 't' for today, 'tm' for tommorow.\n"
+                    "You can also enter '+1' for tommorow, '+2' for the day after tommorow, etc: "
                 )
                 date = get_date_in_utc(date)
             except ValueError:
@@ -99,7 +103,9 @@ if __name__ == "__main__":
                     hour = str(hour)
                     url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, hour=hour)
                     filepath = get_filepath(
-                        download_dir=os.path.abspath(os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")),
+                        download_dir=os.path.abspath(
+                            os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")
+                        ),
                         date=date,
                         hour=hour
                     )
