@@ -112,4 +112,4 @@ if __name__ == "__main__":
                 sys.exit("API did not respond! Check API URL or network connection!")
             break
     except KeyboardInterrupt:
-        sys.exit("Program stopped by user.")
+        sys.exit("The program has been stopped by user.")
