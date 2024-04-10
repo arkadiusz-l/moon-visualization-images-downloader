@@ -21,14 +21,6 @@ def get_hour_from_user(text: str) -> int:
     return hour
 
 
-def convert_user_hour_to_utc(hour: int) -> str:
-    user_time = datetime.now().replace(hour=hour, minute=0, second=0, microsecond=0)
-    utc_time = user_time.astimezone(timezone.utc)
-    utc_time = utc_time.hour
-    logging.debug(f"{utc_time=}")
-    return str(utc_time)
-
-
 def get_date_from_user(date: str) -> str:
     if date == "t":
         return str(datetime.now().date())
@@ -40,9 +32,16 @@ def get_date_from_user(date: str) -> str:
         return date
 
 
-def get_image_url_from_api(api: str, date: str, hour: str) -> str:
-    hour = "0" + hour if len(hour) < 2 else hour
-    endpoint = f"{api}/{date}T{hour}:00"
+def convert_user_date_to_utc(date: str, hour: str) -> str:
+    hour = "0" + hour if 2 > len(hour) > 0 else hour
+    user_datetime_str = f"{date} {hour}"
+    user_datetime = datetime.strptime(user_datetime_str, "%Y-%m-%d %H")
+    utc_datetime = user_datetime.astimezone(timezone.utc)
+    return utc_datetime.strftime("%Y-%m-%dT%H")
+
+
+def get_image_url_from_api(api: str, date: str) -> str:
+    endpoint = f"{api}/{date}:00"
     logging.debug(f"{endpoint=}")
     response = requests.get(endpoint)
     image_url = json.loads(response.content)
@@ -111,9 +110,9 @@ if __name__ == "__main__":
                 downloaded = 0
                 try:
                     for user_hour in range(user_start_hour, user_end_hour + 1):
-                        utc_hour = convert_user_hour_to_utc(user_hour)
                         user_hour = str(user_hour)
-                        url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, hour=utc_hour)
+                        utc_date = convert_user_date_to_utc(date=date, hour=user_hour)
+                        url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=utc_date)
                         filepath = get_filepath(
                             download_dir=os.path.abspath(
                                 os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")
