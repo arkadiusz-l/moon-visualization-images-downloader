@@ -1,7 +1,7 @@
-import json
-import logging
 import os
 import sys
+import json
+import logging
 from datetime import datetime, timedelta
 import requests
 
@@ -10,14 +10,14 @@ class HoursOrderError(Exception):
     pass
 
 
-class HoursError(Exception):
+class HoursValueError(Exception):
     pass
 
 
 def get_hour_from_user(text: str) -> int:
-    hour = int(input(f"The hour of the {text} Moon visualization image (0-23): "))
+    hour = int(input(f"Enter the hour of the {text} Moon visualization image (0-23): "))
     if hour < 0 or hour > 23:
-        raise HoursError
+        raise HoursValueError
     return hour
 
 
@@ -26,6 +26,8 @@ def get_date_in_utc(date: str) -> str:
         return str(datetime.now().date())
     elif date == "tm":
         return str(datetime.now().date() + timedelta(days=1))
+    elif len(date) <= 3 and date.startswith("+"):
+        return str(datetime.now().date() + timedelta(days=int(date[1:])))
     elif bool(datetime.strptime(date, "%Y-%m-%d")):
         return date
 
@@ -58,7 +60,7 @@ def get_filepath(download_dir: str, date: str, hour: str) -> str:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)  # Set to DEBUG for more details, INFO normally
+    logging.basicConfig(level=logging.INFO)  # Set to DEBUG for more details, INFO normally
     logging.getLogger("urllib3").setLevel(logging.WARNING)  # disable standard DEBUG logs from the 'requests' library
 
     date = None
@@ -70,7 +72,9 @@ if __name__ == "__main__":
         while True:
             try:
                 date = input(
-                    "Enter the date for which I should download images (YYYY-MM-DD or 't' for Today, 'tm' for Tommorow): "
+                    "Enter the date for which I should download images.\n"
+                    "You can enter YYYY-MM-DD or 't' for today, 'tm' for tommorow.\n"
+                    "You can also enter '+1' for tommorow, '+2' for the day after tommorow, etc: "
                 )
                 date = get_date_in_utc(date)
             except ValueError:
@@ -87,26 +91,34 @@ if __name__ == "__main__":
             except ValueError:
                 print(error_message)
                 continue
-            except HoursError:
+            except HoursValueError:
                 print(error_message)
                 continue
             except HoursOrderError:
                 print("The hour of the first Moon visualization image should be earlier then the last one.")
                 continue
 
-            try:
-                for hour in range(start_hour, end_hour + 1):
-                    hour = str(hour)
-                    url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, hour=hour)
-                    filepath = get_filepath(
-                        download_dir=os.path.abspath(os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")),
-                        date=date,
-                        hour=hour
-                    )
-                    download_image(url=url, path=filepath)
+            choice = input(f"{end_hour - start_hour + 1} files will be downloaded. Enter 'y' if continue: ")
+            if choice == "y":
+                downloaded = 0
+                try:
+                    for hour in range(start_hour, end_hour + 1):
+                        hour = str(hour)
+                        url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, hour=hour)
+                        filepath = get_filepath(
+                            download_dir=os.path.abspath(
+                                os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")
+                            ),
+                            date=date,
+                            hour=hour
+                        )
+                        download_image(url=url, path=filepath)
+                        downloaded += 1
+                except requests.exceptions.ConnectionError:
+                    sys.exit("API did not respond! Check API URL or network connection!")
+                finally:
+                    print(f"{downloaded} files downloaded!")
                 print("Done.")
-            except requests.exceptions.ConnectionError:
-                sys.exit("API did not respond! Check API URL or network connection!")
             break
     except KeyboardInterrupt:
         sys.exit("The program has been stopped by user.")
