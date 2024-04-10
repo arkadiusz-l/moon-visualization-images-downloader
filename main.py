@@ -1,9 +1,9 @@
 import json
-import urllib.request
 from datetime import datetime
 import logging
-from os import path, environ
+import os
 import sys
+import requests
 
 
 def get_current_date_in_utc() -> str:
@@ -15,8 +15,8 @@ def get_image_url_from_api(api: str, date: str, time: str) -> str:
         time = "0" + time
     endpoint = f"{api}/{date}T{time}:00"
     logging.debug(f"{endpoint=}")
-    response = urllib.request.urlopen(endpoint)
-    url = json.loads(response.read())
+    response = requests.get(endpoint)
+    url = json.loads(response.content)
     url = url["image"]["url"]
     # result = result["image_highres"]["url"]
     logging.debug(f"{url=}")
@@ -24,7 +24,11 @@ def get_image_url_from_api(api: str, date: str, time: str) -> str:
 
 
 def download_image(url: str, path: str) -> None:
-    urllib.request.urlretrieve(url, path)
+    response = requests.get(url)
+    if response.status_code == 200:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "wb") as image:
+            image.write(response.content)
     print(f"The image has been saved in {path}.")
 
 
@@ -34,13 +38,14 @@ class HoursError(Exception):
 
 def get_filepath(download_dir: str, date: str, time: str) -> str:
     filename = f"{date}T0{time}L.jpg" if len(time) < 2 else f"{date}T{time}L.jpg"
-    filepath = path.join(download_dir, filename)
+    filepath = os.path.join(download_dir, filename)
     logging.debug(f"{filepath=}")
     return filepath
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)  # Set to DEBUG for more details, INFO normally
+    logging.getLogger("urllib3").setLevel(logging.WARNING)  # disable standard DEBUG logs
     while True:
         try:
             start = int(input("The hour of the first Moon visualization image (00-23): "))
@@ -54,7 +59,7 @@ if __name__ == "__main__":
                 hour = str(hour)
                 image_url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=today, time=hour)
                 filepath = get_filepath(
-                    download_dir=path.abspath(path.join(environ.get("HOMEPATH"), "Downloads", "Moon Phases")),
+                    download_dir=os.path.abspath(os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")),
                     date=today,
                     time=hour
                 )
@@ -64,10 +69,8 @@ if __name__ == "__main__":
             print("Please enter a value between 00 and 23.")
         except HoursError:
             print("The hour of the first Moon visualization image should be earlier then the last.")
-        except urllib.error.HTTPError:
-            print("Endpoint not found!")
         except KeyboardInterrupt:
             sys.exit("Program stopped by user.")
-        except urllib.error.URLError:
-            sys.exit("Connection timeout! API did not respond! Check API URL or network connection!")
+        except requests.exceptions.ConnectionError:
+            sys.exit("API did not respond! Check API URL or network connection!")
     print("Done.")
