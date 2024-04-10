@@ -7,6 +7,11 @@ def test_get_today_date_in_utc():
     assert get_date_in_utc(date) == str(datetime.now().date())
 
 
+def test_get_tommorow_date_in_utc():
+    date = "tm"
+    assert get_date_in_utc(date) == str(datetime.now().date() + timedelta(days=1))
+
+
 def test_get_filepath_one_digit_hour():
     homepath = environ.get("HOMEPATH")
     date = "2024-04-08"
