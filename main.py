@@ -10,14 +10,14 @@ class HoursOrderError(Exception):
     pass
 
 
-class HoursError(Exception):
+class HoursValueError(Exception):
     pass
 
 
 def get_hour_from_user(text: str) -> int:
     hour = int(input(f"Enter the hour of the {text} Moon visualization image (0-23): "))
     if hour < 0 or hour > 23:
-        raise HoursError
+        raise HoursValueError
     return hour
 
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
             except ValueError:
                 print(error_message)
                 continue
-            except HoursError:
+            except HoursValueError:
                 print(error_message)
                 continue
             except HoursOrderError:
