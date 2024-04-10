@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import requests
 
 
@@ -21,7 +21,7 @@ def get_hour_from_user(text: str) -> int:
     return hour
 
 
-def get_date_in_utc(date: str) -> str:
+def get_date_from_user(date: str) -> str:
     if date == "t":
         return str(datetime.now().date())
     elif date == "tm":
@@ -32,9 +32,16 @@ def get_date_in_utc(date: str) -> str:
         return date
 
 
-def get_image_url_from_api(api: str, date: str, hour: str) -> str:
-    hour = "0" + hour if len(hour) < 2 else hour
-    endpoint = f"{api}/{date}T{hour}:00"
+def convert_user_date_to_utc(date: str, hour: str) -> str:
+    hour = "0" + hour if 2 > len(hour) > 0 else hour
+    user_datetime_str = f"{date} {hour}"
+    user_datetime = datetime.strptime(user_datetime_str, "%Y-%m-%d %H")
+    utc_datetime = user_datetime.astimezone(timezone.utc)
+    return utc_datetime.strftime("%Y-%m-%dT%H")
+
+
+def get_image_url_from_api(api: str, date: str) -> str:
+    endpoint = f"{api}/{date}:00"
     logging.debug(f"{endpoint=}")
     response = requests.get(endpoint)
     image_url = json.loads(response.content)
@@ -64,8 +71,8 @@ if __name__ == "__main__":
     logging.getLogger("urllib3").setLevel(logging.WARNING)  # disable standard DEBUG logs from the 'requests' library
 
     date = None
-    start_hour = None
-    end_hour = None
+    user_start_hour = None
+    user_end_hour = None
     error_message = "Please enter a value between 0 and 23."
 
     try:
@@ -76,7 +83,7 @@ if __name__ == "__main__":
                     "You can enter YYYY-MM-DD or 't' for today, 'tm' for tommorow.\n"
                     "You can also enter '+1' for tommorow, '+2' for the day after tommorow, etc: "
                 )
-                date = get_date_in_utc(date)
+                date = get_date_from_user(date)
             except ValueError:
                 print("The date is not valid! Please enter a valid date.")
                 continue
@@ -84,9 +91,9 @@ if __name__ == "__main__":
 
         while True:
             try:
-                start_hour = get_hour_from_user(text="first")
-                end_hour = get_hour_from_user(text="last")
-                if start_hour > end_hour:
+                user_start_hour = get_hour_from_user(text="first")
+                user_end_hour = get_hour_from_user(text="last")
+                if user_start_hour > user_end_hour:
                     raise HoursOrderError
             except ValueError:
                 print(error_message)
@@ -98,19 +105,20 @@ if __name__ == "__main__":
                 print("The hour of the first Moon visualization image should be earlier then the last one.")
                 continue
 
-            choice = input(f"{end_hour - start_hour + 1} files will be downloaded. Enter 'y' if continue: ")
+            choice = input(f"{user_end_hour - user_start_hour + 1} files will be downloaded. Enter 'y' if continue: ")
             if choice == "y":
                 downloaded = 0
                 try:
-                    for hour in range(start_hour, end_hour + 1):
-                        hour = str(hour)
-                        url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, hour=hour)
+                    for user_hour in range(user_start_hour, user_end_hour + 1):
+                        user_hour = str(user_hour)
+                        utc_date = convert_user_date_to_utc(date=date, hour=user_hour)
+                        url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=utc_date)
                         filepath = get_filepath(
                             download_dir=os.path.abspath(
                                 os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")
                             ),
                             date=date,
-                            hour=hour
+                            hour=user_hour
                         )
                         download_image(url=url, path=filepath)
                         downloaded += 1
