@@ -15,7 +15,7 @@ class HoursError(Exception):
 
 
 def get_hour_from_user(text: str) -> int:
-    hour = int(input(f"The hour of the {text} Moon visualization image (0-23): "))
+    hour = int(input(f"Enter the hour of the {text} Moon visualization image (0-23): "))
     if hour < 0 or hour > 23:
         raise HoursError
     return hour
