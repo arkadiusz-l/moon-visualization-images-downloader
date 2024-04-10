@@ -7,6 +7,21 @@ import sys
 import requests
 
 
+class HoursOrderError(Exception):
+    pass
+
+
+class HoursError(Exception):
+    pass
+
+
+def get_hour_from_user(text: str) -> int:
+    hour = int(input(f"The hour of the {text} Moon visualization image (0-23): "))
+    if hour < 0 or hour > 23:
+        raise HoursError
+    return hour
+
+
 def get_date_in_utc(date: str) -> str:
     if date == "t":
         return str(datetime.now().date())
@@ -14,8 +29,6 @@ def get_date_in_utc(date: str) -> str:
         return str(datetime.now().date() + timedelta(days=1))
     elif bool(datetime.strptime(date, "%Y-%m-%d")):
         return date
-    else:
-        raise DateError
 
 
 def get_image_url_from_api(api: str, date: str, time: str) -> str:
@@ -40,14 +53,6 @@ def download_image(url: str, path: str) -> None:
     print(f"The image has been saved in {path}.")
 
 
-class HoursError(Exception):
-    pass
-
-
-class DateError(Exception):
-    pass
-
-
 def get_filepath(download_dir: str, date: str, time: str) -> str:
     filename = f"{date}T0{time}L.jpg" if len(time) < 2 else f"{date}T{time}L.jpg"
     filepath = os.path.join(download_dir, filename)
@@ -58,16 +63,37 @@ def get_filepath(download_dir: str, date: str, time: str) -> str:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)  # Set to DEBUG for more details, INFO normally
     logging.getLogger("urllib3").setLevel(logging.WARNING)  # disable standard DEBUG logs
+
+    # start_hour = None
+    # end_hour = None
+
     while True:
         try:
-            date = input("Enter the date for which I should download images (YYYY-MM-DD or 't' for Today, 'tm' for Tommorow): ")
-            start_hour = int(input("The hour of the first Moon visualization image (00-23): "))
-            end_hour = int(input("The hour of the last Moon visualization image (00-23): "))
-            if start_hour > end_hour:
-                raise HoursError
-
+            date = input(
+                "Enter the date for which I should download images (YYYY-MM-DD or 't' for Today, 'tm' for Tommorow): "
+            )
             date = get_date_in_utc(date)
+        except ValueError:
+            print("The date is not valid! Please enter a valid date.")
+            continue
+        break
 
+    while True:
+        try:
+            start_hour = get_hour_from_user(text="first")
+            end_hour = get_hour_from_user(text="last")
+            if start_hour > end_hour:
+                raise HoursOrderError
+        except HoursError:
+            print("Please enter a value between 0 and 23.")
+            continue
+        except ValueError:
+            raise HoursError
+        except HoursOrderError:
+            print("The hour of the first Moon visualization image should be earlier then the last one.")
+            continue
+
+        try:
             for hour in range(start_hour, end_hour + 1):
                 hour = str(hour)
                 image_url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, time=hour)
@@ -78,14 +104,9 @@ if __name__ == "__main__":
                 )
                 download_image(url=image_url, path=filepath)
             break
-        except ValueError:
-            print("Please enter a value between 00 and 23.")
-        except HoursError:
-            print("The hour of the first Moon visualization image should be earlier then the last.")
-        except DateError:
-            print("The given date is not valid!")
+
         except KeyboardInterrupt:
             sys.exit("Program stopped by user.")
         except requests.exceptions.ConnectionError:
             sys.exit("API did not respond! Check API URL or network connection!")
-    print("Done.")
+    # print("Done.")
