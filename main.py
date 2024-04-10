@@ -59,7 +59,7 @@ def get_filepath(download_dir: str, date: str, hour: str) -> str:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)  # Set to DEBUG for more details, INFO normally
-    logging.getLogger("urllib3").setLevel(logging.WARNING)  # disable standard DEBUG logs
+    logging.getLogger("urllib3").setLevel(logging.WARNING)  # disable standard DEBUG logs from the 'requests' library
 
     date = None
     start_hour = None
