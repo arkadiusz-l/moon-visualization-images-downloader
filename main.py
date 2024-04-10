@@ -64,49 +64,52 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)  # Set to DEBUG for more details, INFO normally
     logging.getLogger("urllib3").setLevel(logging.WARNING)  # disable standard DEBUG logs
 
-    # start_hour = None
-    # end_hour = None
+    date = None
+    start_hour = None
+    end_hour = None
+    error_message = "Please enter a value between 0 and 23."
 
-    while True:
-        try:
-            date = input(
-                "Enter the date for which I should download images (YYYY-MM-DD or 't' for Today, 'tm' for Tommorow): "
-            )
-            date = get_date_in_utc(date)
-        except ValueError:
-            print("The date is not valid! Please enter a valid date.")
-            continue
-        break
-
-    while True:
-        try:
-            start_hour = get_hour_from_user(text="first")
-            end_hour = get_hour_from_user(text="last")
-            if start_hour > end_hour:
-                raise HoursOrderError
-        except HoursError:
-            print("Please enter a value between 0 and 23.")
-            continue
-        except ValueError:
-            raise HoursError
-        except HoursOrderError:
-            print("The hour of the first Moon visualization image should be earlier then the last one.")
-            continue
-
-        try:
-            for hour in range(start_hour, end_hour + 1):
-                hour = str(hour)
-                image_url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, time=hour)
-                filepath = get_filepath(
-                    download_dir=os.path.abspath(os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")),
-                    date=date,
-                    time=hour
+    try:
+        while True:
+            try:
+                date = input(
+                    "Enter the date for which I should download images (YYYY-MM-DD or 't' for Today, 'tm' for Tommorow): "
                 )
-                download_image(url=image_url, path=filepath)
+                date = get_date_in_utc(date)
+            except ValueError:
+                print("The date is not valid! Please enter a valid date.")
+                continue
             break
 
-        except KeyboardInterrupt:
-            sys.exit("Program stopped by user.")
-        except requests.exceptions.ConnectionError:
-            sys.exit("API did not respond! Check API URL or network connection!")
-    # print("Done.")
+        while True:
+            try:
+                start_hour = get_hour_from_user(text="first")
+                end_hour = get_hour_from_user(text="last")
+                if start_hour > end_hour:
+                    raise HoursOrderError
+            except ValueError:
+                print(error_message)
+                continue
+            except HoursError:
+                print(error_message)
+                continue
+            except HoursOrderError:
+                print("The hour of the first Moon visualization image should be earlier then the last one.")
+                continue
+
+            try:
+                for hour in range(start_hour, end_hour + 1):
+                    hour = str(hour)
+                    image_url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, time=hour)
+                    filepath = get_filepath(
+                        download_dir=os.path.abspath(os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")),
+                        date=date,
+                        time=hour
+                    )
+                    download_image(url=image_url, path=filepath)
+                print("Done.")
+            except requests.exceptions.ConnectionError:
+                sys.exit("API did not respond! Check API URL or network connection!")
+            break
+    except KeyboardInterrupt:
+        sys.exit("Program stopped by user.")
