@@ -60,7 +60,7 @@ def get_filepath(download_dir: str, date: str, hour: str) -> str:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)  # Set to DEBUG for more details, INFO normally
+    logging.basicConfig(level=logging.INFO)  # Set to DEBUG for more details, INFO normally
     logging.getLogger("urllib3").setLevel(logging.WARNING)  # disable standard DEBUG logs from the 'requests' library
 
     date = None
@@ -98,21 +98,27 @@ if __name__ == "__main__":
                 print("The hour of the first Moon visualization image should be earlier then the last one.")
                 continue
 
-            try:
-                for hour in range(start_hour, end_hour + 1):
-                    hour = str(hour)
-                    url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, hour=hour)
-                    filepath = get_filepath(
-                        download_dir=os.path.abspath(
-                            os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")
-                        ),
-                        date=date,
-                        hour=hour
-                    )
-                    download_image(url=url, path=filepath)
+            choice = input(f"{end_hour - start_hour + 1} files will be downloaded. Enter 'y' if continue: ")
+            if choice == "y":
+                downloaded = 0
+                try:
+                    for hour in range(start_hour, end_hour + 1):
+                        hour = str(hour)
+                        url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, hour=hour)
+                        filepath = get_filepath(
+                            download_dir=os.path.abspath(
+                                os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")
+                            ),
+                            date=date,
+                            hour=hour
+                        )
+                        download_image(url=url, path=filepath)
+                        downloaded += 1
+                except requests.exceptions.ConnectionError:
+                    sys.exit("API did not respond! Check API URL or network connection!")
+                finally:
+                    print(f"{downloaded} files downloaded!")
                 print("Done.")
-            except requests.exceptions.ConnectionError:
-                sys.exit("API did not respond! Check API URL or network connection!")
             break
     except KeyboardInterrupt:
         sys.exit("The program has been stopped by user.")
