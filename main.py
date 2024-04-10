@@ -31,17 +31,17 @@ def get_date_in_utc(date: str) -> str:
         return date
 
 
-def get_image_url_from_api(api: str, date: str, time: str) -> str:
-    if len(time) < 2:
-        time = "0" + time
-    endpoint = f"{api}/{date}T{time}:00"
+def get_image_url_from_api(api: str, date: str, hour: str) -> str:
+    if len(hour) < 2:
+        hour = "0" + hour
+    endpoint = f"{api}/{date}T{hour}:00"
     logging.debug(f"{endpoint=}")
     response = requests.get(endpoint)
-    url = json.loads(response.content)
-    url = url["image"]["url"]
+    image_url = json.loads(response.content)
+    image_url = image_url["image"]["url"]
     # result = result["image_highres"]["url"]
-    logging.debug(f"{url=}")
-    return url
+    logging.debug(f"{image_url=}")
+    return image_url
 
 
 def download_image(url: str, path: str) -> None:
@@ -53,8 +53,8 @@ def download_image(url: str, path: str) -> None:
     print(f"The image has been saved in {path}.")
 
 
-def get_filepath(download_dir: str, date: str, time: str) -> str:
-    filename = f"{date}T0{time}L.jpg" if len(time) < 2 else f"{date}T{time}L.jpg"
+def get_filepath(download_dir: str, date: str, hour: str) -> str:
+    filename = f"{date}T0{hour}L.jpg" if len(hour) < 2 else f"{date}T{hour}L.jpg"
     filepath = os.path.join(download_dir, filename)
     logging.debug(f"{filepath=}")
     return filepath
@@ -100,13 +100,13 @@ if __name__ == "__main__":
             try:
                 for hour in range(start_hour, end_hour + 1):
                     hour = str(hour)
-                    image_url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, time=hour)
+                    url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=date, hour=hour)
                     filepath = get_filepath(
                         download_dir=os.path.abspath(os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")),
                         date=date,
-                        time=hour
+                        hour=hour
                     )
-                    download_image(url=image_url, path=filepath)
+                    download_image(url=url, path=filepath)
                 print("Done.")
             except requests.exceptions.ConnectionError:
                 sys.exit("API did not respond! Check API URL or network connection!")
