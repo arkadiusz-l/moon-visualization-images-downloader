@@ -72,7 +72,7 @@ def download_image(url: str, path: str) -> None:
 
 
 def get_filepath(download_dir: str, date: str, hour: str) -> str:
-    filename = f"{date}T0{hour}L.jpg" if len(hour) < 2 else f"{date}T{hour}L.jpg"
+    filename = f"{date}T0{hour}L.tif" if len(hour) < 2 else f"{date}T{hour}L.tif"
     filepath = os.path.join(download_dir, filename)
     logging.debug(f"{filepath=}")
     return filepath
