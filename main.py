@@ -11,14 +11,14 @@ class HoursOrderError(Exception):
     pass
 
 
-class HoursValueError(Exception):
+class HourValueError(Exception):
     pass
 
 
 def get_hour_from_user(text: str) -> int:
     hour = int(input(f"Enter the hour of the {text} Moon visualization image (0-23): "))
     if hour < 0 or hour > 23:
-        raise HoursValueError
+        raise HourValueError
     return hour
 
 
@@ -55,6 +55,7 @@ def download_image(url: str, path: str) -> None:
     response = requests.get(url, stream=True)
     if response.status_code == 200:
         image_length = int(response.headers.get("content-length", 0))
+        logging.debug(f"{image_length=}")
         chunk_size = 1024
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "wb") as image, tqdm(
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     date = None
     user_start_hour = None
     user_end_hour = None
-    error_message = "Please enter a value between 0 and 23."
+    hour_value_error_message = "Please enter a value between 0 and 23."
 
     try:
         while True:
@@ -107,10 +108,10 @@ if __name__ == "__main__":
                 if user_start_hour > user_end_hour:
                     raise HoursOrderError
             except ValueError:
-                print(error_message)
+                print(hour_value_error_message)
                 continue
-            except HoursValueError:
-                print(error_message)
+            except HourValueError:
+                print(hour_value_error_message)
                 continue
             except HoursOrderError:
                 print("The hour of the first Moon visualization image should be earlier then the last one.")
