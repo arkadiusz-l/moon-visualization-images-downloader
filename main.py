@@ -46,7 +46,7 @@ def get_image_url_from_api(api: str, date: str) -> str:
     logging.debug(f"{endpoint=}")
     response = requests.get(endpoint)
     image_url = json.loads(response.content)
-    image_url = image_url["image"]["url"]
+    image_url = image_url["image_highres"]["url"]
     logging.debug(f"{image_url=}")
     return image_url
 
@@ -135,6 +135,8 @@ if __name__ == "__main__":
                         downloaded += 1
                 except requests.exceptions.ConnectionError:
                     sys.exit("API did not respond! Check API URL or network connection!")
+                except requests.exceptions.ChunkedEncodingError or urllib3.exceptions.ProtocolError:
+                    sys.exit("Connection aborted! Check your network connection!")
                 finally:
                     print(f"{downloaded} files downloaded!")
                 print("Done.")
