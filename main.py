@@ -22,7 +22,7 @@ def get_hour_from_user(text: str) -> int:
     return hour
 
 
-def get_date_from_user(date: str) -> str:
+def parse_user_date(date: str) -> str:
     if date == "t":
         return str(datetime.now().date())
     elif date == "tm":
@@ -33,7 +33,7 @@ def get_date_from_user(date: str) -> str:
         return date
 
 
-def convert_user_date_to_utc(date: str, hour: str) -> str:
+def convert_user_date_and_hour_to_utc(date: str, hour: str) -> str:
     hour = "0" + hour if 2 > len(hour) > 0 else hour
     user_datetime_str = f"{date} {hour}"
     user_datetime = datetime.strptime(user_datetime_str, "%Y-%m-%d %H")
@@ -94,7 +94,7 @@ if __name__ == "__main__":
                     "You can enter YYYY-MM-DD or 't' for today, 'tm' for tommorow.\n"
                     "You can also enter '+1' for tommorow, '+2' for the day after tommorow, etc: "
                 )
-                date = get_date_from_user(date)
+                date = parse_user_date(date)
             except ValueError:
                 print("The date is not valid! Please enter a valid date.")
                 continue
@@ -122,7 +122,7 @@ if __name__ == "__main__":
                 try:
                     for user_hour in range(user_start_hour, user_end_hour + 1):
                         user_hour = str(user_hour)
-                        utc_date = convert_user_date_to_utc(date=date, hour=user_hour)
+                        utc_date = convert_user_date_and_hour_to_utc(date=date, hour=user_hour)
                         url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=utc_date)
                         filepath = get_filepath(
                             download_dir=os.path.abspath(
