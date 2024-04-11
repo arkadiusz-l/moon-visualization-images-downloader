@@ -4,6 +4,7 @@ import json
 import logging
 from datetime import datetime, timedelta, timezone
 import requests
+from tqdm import tqdm
 
 
 class HoursOrderError(Exception):
@@ -51,11 +52,21 @@ def get_image_url_from_api(api: str, date: str) -> str:
 
 
 def download_image(url: str, path: str) -> None:
-    response = requests.get(url)
+    response = requests.get(url, stream=True)
     if response.status_code == 200:
+        image_length = int(response.headers.get("content-length", 0))
+        chunk_size = 1024
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "wb") as image:
-            image.write(response.content)
+        with open(path, "wb") as image, tqdm(
+                desc=path.split("\\")[-1],
+                total=image_length,
+                unit='iB',
+                unit_scale=True,
+                unit_divisor=chunk_size,
+        ) as bar:
+            for data in response.iter_content(chunk_size=chunk_size):
+                size = image.write(data)
+                bar.update(size)
     print(f"The image has been saved in {path}.")
 
 
@@ -105,7 +116,7 @@ if __name__ == "__main__":
                 print("The hour of the first Moon visualization image should be earlier then the last one.")
                 continue
 
-            choice = input(f"{user_end_hour - user_start_hour + 1} files will be downloaded. Enter 'y' if continue: ")
+            choice = input(f"{user_end_hour - user_start_hour + 1} file(s) will be downloaded. Enter 'y' if continue: ")
             if choice == "y":
                 downloaded = 0
                 try:
