@@ -4,6 +4,7 @@ import json
 import logging
 from datetime import datetime, timedelta, timezone
 import requests
+from tqdm import tqdm
 
 
 class HoursOrderError(Exception):
@@ -21,7 +22,7 @@ def get_hour_from_user(text: str) -> int:
     return hour
 
 
-def get_date_from_user(date: str) -> str:
+def parse_user_date(date: str) -> str:
     if date == "t":
         return str(datetime.now().date())
     elif date == "tm":
@@ -32,7 +33,7 @@ def get_date_from_user(date: str) -> str:
         return date
 
 
-def convert_user_date_to_utc(date: str, hour: str) -> str:
+def convert_user_date_and_hour_to_utc(date: str, hour: str) -> str:
     hour = "0" + hour if 2 > len(hour) > 0 else hour
     user_datetime_str = f"{date} {hour}"
     user_datetime = datetime.strptime(user_datetime_str, "%Y-%m-%d %H")
@@ -51,11 +52,21 @@ def get_image_url_from_api(api: str, date: str) -> str:
 
 
 def download_image(url: str, path: str) -> None:
-    response = requests.get(url)
+    response = requests.get(url, stream=True)
     if response.status_code == 200:
+        image_length = int(response.headers.get("content-length", 0))
+        chunk_size = 1024
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "wb") as image:
-            image.write(response.content)
+        with open(path, "wb") as image, tqdm(
+                desc=path.split("\\")[-1],
+                total=image_length,
+                unit='iB',
+                unit_scale=True,
+                unit_divisor=chunk_size,
+        ) as bar:
+            for data in response.iter_content(chunk_size=chunk_size):
+                size = image.write(data)
+                bar.update(size)
     print(f"The image has been saved in {path}.")
 
 
@@ -83,7 +94,7 @@ if __name__ == "__main__":
                     "You can enter YYYY-MM-DD or 't' for today, 'tm' for tommorow.\n"
                     "You can also enter '+1' for tommorow, '+2' for the day after tommorow, etc: "
                 )
-                date = get_date_from_user(date)
+                date = parse_user_date(date)
             except ValueError:
                 print("The date is not valid! Please enter a valid date.")
                 continue
@@ -105,13 +116,13 @@ if __name__ == "__main__":
                 print("The hour of the first Moon visualization image should be earlier then the last one.")
                 continue
 
-            choice = input(f"{user_end_hour - user_start_hour + 1} files will be downloaded. Enter 'y' if continue: ")
+            choice = input(f"{user_end_hour - user_start_hour + 1} file(s) will be downloaded. Enter 'y' if continue: ")
             if choice == "y":
                 downloaded = 0
                 try:
                     for user_hour in range(user_start_hour, user_end_hour + 1):
                         user_hour = str(user_hour)
-                        utc_date = convert_user_date_to_utc(date=date, hour=user_hour)
+                        utc_date = convert_user_date_and_hour_to_utc(date=date, hour=user_hour)
                         url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=utc_date)
                         filepath = get_filepath(
                             download_dir=os.path.abspath(
