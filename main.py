@@ -15,6 +15,10 @@ class HourValueError(Exception):
     pass
 
 
+class DateOutOfRangeError(Exception):
+    pass
+
+
 def get_hour_from_user(text: str) -> int:
     hour = int(input(f"Enter the hour of the {text} Moon visualization image (0-23): "))
     if hour < 0 or hour > 23:
@@ -38,6 +42,9 @@ def convert_user_date_and_hour_to_utc(date: str, hour: str) -> str:
     user_datetime_str = f"{date} {hour}"
     user_datetime = datetime.strptime(user_datetime_str, "%Y-%m-%d %H")
     utc_datetime = user_datetime.astimezone(timezone.utc)
+    logging.debug(f"{utc_datetime=}")
+    if utc_datetime < datetime(2011, 1, 1, 0, 0, tzinfo=timezone.utc) or utc_datetime > datetime(datetime.now().year, 12, 31, 23, 0, tzinfo=timezone.utc):
+        raise DateOutOfRangeError
     return utc_datetime.strftime("%Y-%m-%dT%H")
 
 
@@ -142,6 +149,9 @@ if __name__ == "__main__":
                         )
                         download_image(url=url, path=filepath)
                         downloaded += 1
+                        print("Done.")
+                except DateOutOfRangeError:
+                    print(f"The date and time must be between 2011-01-01 00:00 UTC and {datetime.now().year}-12-31 23:00 UTC.")
                 except requests.exceptions.SSLError:
                     sys.exit("SSL certificate verify failed!")
                 except requests.exceptions.ConnectionError:
@@ -152,7 +162,6 @@ if __name__ == "__main__":
                     sys.exit(error)
                 finally:
                     print(f"{downloaded} files downloaded!")
-                print("Done.")
             break
     except KeyboardInterrupt:
         sys.exit("The program has been stopped by user.")
