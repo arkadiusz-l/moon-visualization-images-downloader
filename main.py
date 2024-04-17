@@ -142,10 +142,14 @@ if __name__ == "__main__":
                         )
                         download_image(url=url, path=filepath)
                         downloaded += 1
-                # except requests.exceptions.ConnectionError:
-                #     sys.exit("API did not respond! Check API URL or network connection!")
+                except requests.exceptions.SSLError:
+                    sys.exit("SSL certificate verify failed!")
+                except requests.exceptions.ConnectionError:
+                    sys.exit("API did not respond! Check API URL or network connection!")
                 except requests.exceptions.ChunkedEncodingError or urllib3.exceptions.ProtocolError:
                     sys.exit("Connection aborted! Check your network connection!")
+                except Exception as error:
+                    sys.exit(error)
                 finally:
                     print(f"{downloaded} files downloaded!")
                 print("Done.")
