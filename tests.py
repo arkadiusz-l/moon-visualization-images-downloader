@@ -35,6 +35,12 @@ def test_get_hour_from_user_invalid():
             get_hour_from_user("24")
 
 
+def test_get_hour_from_user_invalid_minus_number():
+    with patch("builtins.input", return_value="-1"):
+        with pytest.raises(HourValueError):
+            get_hour_from_user("-1")
+
+
 def test_parse_user_date_today():
     assert parse_user_date("t") == str(datetime.now().date())
 
