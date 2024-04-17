@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 from main import (get_hour_from_user, get_filepath, get_image_url_from_api, parse_user_date,
-                  convert_user_date_and_hour_to_utc, get_image_url_from_api, HourValueError)
+                  convert_user_date_and_hour_to_utc, get_image_url_from_api, HourValueError, DateOutOfRangeError)
 
 
 @pytest.fixture
@@ -33,6 +33,12 @@ def test_get_hour_from_user_invalid():
     with patch("builtins.input", return_value="24"):
         with pytest.raises(HourValueError):
             get_hour_from_user("24")
+
+
+def test_get_hour_from_user_invalid_minus_number():
+    with patch("builtins.input", return_value="-1"):
+        with pytest.raises(HourValueError):
+            get_hour_from_user("-1")
 
 
 def test_parse_user_date_today():
@@ -102,3 +108,14 @@ def test_convert_user_date_and_hour_to_utc_warsaw_winter_time_midnight():
 def test_convert_user_date_and_hour_to_utc_invalid_date():
     with pytest.raises(ValueError):
         convert_user_date_and_hour_to_utc("2024-13-01", "05")
+
+
+def test_convert_user_date_and_hour_date_lower_than_range():
+    with pytest.raises(DateOutOfRangeError):
+        convert_user_date_and_hour_to_utc("2010-12-31", "23")
+
+
+def test_convert_user_date_and_hour_date_greater_than_range():
+    with pytest.raises(DateOutOfRangeError):
+        next_year = str(datetime.now().year + 1)
+        convert_user_date_and_hour_to_utc(f"{next_year}-01-01", "01")
