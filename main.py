@@ -79,7 +79,15 @@ def get_filepath(download_dir: str, date: str, hour: str) -> str:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)  # Set to DEBUG for more details, INFO normally
+    logging_level = logging.INFO
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "-d":
+            logging_level = logging.DEBUG
+            print("/// The program is running in DEBUG mode ///")
+        elif sys.argv[1] != "-d":
+            print("An unsupported argument was entered.")
+            sys.exit()
+    logging.basicConfig(level=logging_level)
     logging.getLogger("urllib3").setLevel(logging.WARNING)  # disable standard DEBUG logs from the 'requests' library
 
     date = None
@@ -134,8 +142,8 @@ if __name__ == "__main__":
                         )
                         download_image(url=url, path=filepath)
                         downloaded += 1
-                except requests.exceptions.ConnectionError:
-                    sys.exit("API did not respond! Check API URL or network connection!")
+                # except requests.exceptions.ConnectionError:
+                #     sys.exit("API did not respond! Check API URL or network connection!")
                 except requests.exceptions.ChunkedEncodingError or urllib3.exceptions.ProtocolError:
                     sys.exit("Connection aborted! Check your network connection!")
                 finally:
