@@ -142,7 +142,7 @@ if __name__ == "__main__":
                         url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=utc_date)
                         filepath = get_filepath(
                             download_dir=os.path.abspath(
-                                os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Phases")
+                                os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Visualizations")
                             ),
                             date=date,
                             hour=user_hour
