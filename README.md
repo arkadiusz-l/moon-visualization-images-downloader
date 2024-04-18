@@ -19,7 +19,7 @@ Previously, I downloaded this images manually from the
 that NASA provides an API, I wrote this small program.
 
 ## Usage
-After downloading the latest release or cloning the repository, launch a terminal on your operating system,
+After downloading the [latest release](https://github.com/arkadiusz-l/moon-phase-images-downloader/releases/latest) or cloning the repository, launch a terminal on your operating system,
 go to the program directory and type:
 `python main.py`.
 
