@@ -40,7 +40,7 @@ The downloaded files are saved in the **Downloads\Moon Phase** directory of the 
 (for Windows, for Linux I still have to write :))\
 The program handles exceptions in the event of loss of connection to the API or unverified SSL certificate.
 
-#### Usage example:
+### Usage example:
 If your current time zone is UTC+2 and you enter:
 - date: **t**
 - the hour of the first image: **20**
@@ -50,6 +50,19 @@ the program will convert the hours to **18** and **21**, and then start download
 **18**, **19**, **20** and **21** UTC of the **current day**.\
 However, for your convenience, the downloaded files are named with the date and time you entered (local).\
 The letter "L" in filename reminds us of this.
+
+### Debug mode
+You can run the program in debug mode, which displays the values calculated by the program:
+- date and time converted from local time zone to UTC,
+- endpoints,
+- path to the image file on the NASA server,
+- file size to download,
+- path where the file will be saved.
+
+To run the program in debug mode, type `python main.py -d`.
+
+## Screenshot
+![screenshot](https://github.com/arkadiusz-l/moon-phase-images-downloader/assets/104087320/10039636-7610-4d13-b755-b7322b8be462)
 
 ## Documentation
 NASA SVS API documentation is available [here](https://nasaviz.gsfc.nasa.gov/help/#apis-dialamoon).
