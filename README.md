@@ -1,4 +1,4 @@
-# Moon Phase Images Downloader
+# Moon Visualization Images Downloader
 I'm writing this small program in order to improve my programming skills.\
 It uses [requests](https://requests.readthedocs.io/en/latest/) to connect with API,
 [logging](https://docs.python.org/3/library/logging.html) for additional debug information,
@@ -19,7 +19,7 @@ Previously, I downloaded this images manually from the
 that NASA provides an API, I wrote this small program.
 
 ## Usage
-After downloading the [latest release](https://github.com/arkadiusz-l/moon-phase-images-downloader/releases/latest) or cloning the repository, launch a terminal on your operating system,
+After downloading the [latest release](https://github.com/arkadiusz-l/moon-visualization-images-downloader/releases/latest) or cloning the repository, launch a terminal on your operating system,
 go to the program directory and type:
 `python main.py`.
 
@@ -36,7 +36,7 @@ The program validates dates according to API requirements:
 - date and time cannot be later than the **current year-12-31 23:59 UTC**.
 
 The program displays a progress bar with information as each file is downloading.\
-The downloaded files are saved in the **Downloads\Moon Phase** directory of the currently logged-in user
+The downloaded files are saved in the **Downloads\Moon Visualizations** directory of the currently logged-in user
 (for Windows, for Linux I still have to write :))\
 The program handles exceptions in the event of loss of connection to the API or unverified SSL certificate.
 
@@ -62,7 +62,7 @@ You can run the program in debug mode, which displays the values calculated by t
 To run the program in debug mode, type `python main.py -d`.
 
 ## Screenshot
-![screenshot](https://github.com/arkadiusz-l/moon-phase-images-downloader/assets/104087320/10039636-7610-4d13-b755-b7322b8be462)
+![screenshot](https://github.com/arkadiusz-l/moon-visualization-images-downloader/assets/104087320/10039636-7610-4d13-b755-b7322b8be462)
 
 ## Documentation
 NASA SVS API documentation is available [here](https://nasaviz.gsfc.nasa.gov/help/#apis-dialamoon).
