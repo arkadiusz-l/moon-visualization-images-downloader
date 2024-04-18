@@ -62,7 +62,7 @@ def download_image(url: str, path: str) -> None:
     response = requests.get(url, stream=True)
     if response.status_code == 200:
         image_length = int(response.headers.get("content-length", 0))
-        logging.debug(f"{image_length=}")
+        logging.debug(f"{image_length=} bytes")
         chunk_size = 1024
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "wb") as image, tqdm(
