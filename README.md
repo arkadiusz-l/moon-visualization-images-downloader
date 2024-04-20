@@ -158,7 +158,7 @@ The downloaded files are saved in the **Downloads\Moon Visualizations** director
 (for Windows, for Linux I still have to write :))\
 The program handles exceptions in the event of loss of connection to the API or unverified SSL certificate.
 
-### Usage example:
+### Usage example
 If your current time zone is UTC+2 and you enter:
 - date: **t**
 - the hour of the first image: **20**
