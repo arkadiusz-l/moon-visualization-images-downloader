@@ -18,11 +18,129 @@ Previously, I downloaded this images manually from the
 [NASA Scientific Visualization Studio (SVS)](https://svs.gsfc.nasa.gov/gallery/moonphase/) website, but when I found out
 that NASA provides an API, I wrote this small program.
 
-## Usage
-After downloading the [latest release](https://github.com/arkadiusz-l/moon-visualization-images-downloader/releases/latest) or cloning the repository, launch a terminal on your operating system,
-go to the program directory and type:
-`python main.py`.
+## Installation
+3 options to choose from:
+#### I. PyCharm or IntelliJ IDEA with the "Python Community Edition" plugin
+1. Create a New Project with the virtual environment, for example **Virtualenv**.
+2. Open the IDE terminal.
+3. Type:
+   ```
+   git clone git@github.com:arkadiusz-l/moon-visualization-images-downloader.git
+   ```
+   or
+   ```
+   git clone https://github.com/arkadiusz-l/moon-visualization-images-downloader.git
+   ```
+4. Navigate to the program's directory by typing:
+   ```
+   cd moon-visualization-images-downloader
+   ```
+5. Make sure that you are inside the virtual environment - you should see `(venv)` before the path.
+6. Type:
+   ```
+   pip install -r requirements.txt
+   ```
+   to install the required dependencies necessary for the program to run.
+7. Now you can run the program by typing:
+   ```
+   python main.py
+   ```
+8. After using the program, exit the virtual environment by typing:
+   ```
+   deactivate
+   ```
+9. The `(venv)` should disappear.
 
+#### II. Downloading release
+1. Download the [latest release](https://github.com/arkadiusz-l/moon-visualization-images-downloader/releases/latest)
+   in a .zip archive.
+2. Unpack the downloaded archive in a directory of your choice.
+3. Open the terminal.
+4. Navigate to the directory with the unpacked program by typing:
+   ```
+   cd directoryname
+   ```
+5. Type:
+   ```
+   python -m venv venv
+   ```
+   to create virtual environment and wait for confirmation.
+6. If you are on Windows, type:
+   ```
+   venv\Scripts\activate
+   ```
+   If you are on Linux or macOS, type:
+   ```
+   source venv/bin/activate
+   ```
+7. Make sure that you are inside the virtual environment - you should see `(venv)` before the path.
+8. Type:
+   ```
+   pip install -r requirements.txt
+   ```
+   to install the required dependencies necessary for the program to run.
+9. Now you can run the program by typing:
+   ```
+   python main.py
+   ```
+10. After using the program, exit the virtual environment by typing:
+    ```
+    deactivate
+    ```
+11. The `(venv)` should disappear.
+
+#### III. Cloning repository
+1. Open the terminal.
+2. Create a new directory by typing:
+   ```
+   mkdir directoryname
+   ```
+3. Navigate to that directory by typing:
+   ```
+   cd directoryname
+   ```
+4. Type:
+   ```
+   git clone git@github.com:arkadiusz-l/moon-visualization-images-downloader.git
+   ```
+   or
+   ```
+   git clone https://github.com/arkadiusz-l/moon-visualization-images-downloader.git
+   ```
+5. Navigate to the program's directory by typing:
+   ```
+   cd moon-visualization-images-downloader
+   ```
+6. Type:
+   ```
+   python -m venv venv
+   ```
+   to create virtual environment and wait for confirmation.
+7. If you are on Windows, type:
+   ```
+   venv\Scripts\activate
+   ```
+   If you are on Linux or macOS, type:
+   ```
+   source venv/bin/activate
+   ```
+8. Make sure that you are inside the virtual environment - you should see `(venv)` before the path.
+9. Type:
+   ```
+   pip install -r requirements.txt
+   ```
+   to install the required dependencies necessary for the program to run.
+10. Now you can run the program by typing:
+    ```
+    python main.py
+    ```
+11. After using the program, exit the virtual environment by typing:
+    ```
+    deactivate
+    ```
+12. The `(venv)` should disappear.
+
+## Usage
 The program will ask you the following things:
 - the date for which you want to download the visualization images,
 - the hour of the first image of the visualization,
@@ -59,7 +177,10 @@ You can run the program in debug mode, which displays the values calculated by t
 - file size to download,
 - path where the file will be saved.
 
-To run the program in debug mode, type `python main.py -d`.
+To run the program in debug mode, type:
+```
+python main.py -d
+```
 
 ## Screenshot
 ![screenshot](https://github.com/arkadiusz-l/moon-visualization-images-downloader/assets/104087320/10039636-7610-4d13-b755-b7322b8be462)
