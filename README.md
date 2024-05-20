@@ -156,6 +156,7 @@ The program validates dates according to API requirements:
 The program displays a progress bar with information as each file is downloading.\
 The downloaded files are saved in the **Downloads\Moon Visualizations** directory of the currently logged-in user
 (for Windows, for Linux I still have to write :))\
+Once the files have finished downloading, the download directory will automatically open in File Explorer.
 The program handles exceptions in the event of loss of connection to the API or unverified SSL certificate.
 
 ### Usage example
