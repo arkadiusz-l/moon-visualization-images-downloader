@@ -161,6 +161,7 @@ if __name__ == "__main__":
             sys.exit()
     logging.basicConfig(level=logging_level)
     logging.getLogger("urllib3").setLevel(logging.WARNING)  # disable standard DEBUG logs from the 'requests' library
+    download_dir = os.path.abspath(os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Visualizations"))
 
     try:
         date = get_date_from_user()
@@ -169,6 +170,7 @@ if __name__ == "__main__":
         if choice == "y":
             download_images()
             print("Done.")
+            os.startfile(download_dir)
     except KeyboardInterrupt:
         sys.exit("The program has been stopped by user.")
     except Exception as error:
