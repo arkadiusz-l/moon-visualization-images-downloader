@@ -19,6 +19,11 @@ Previously, I downloaded this images manually from the
 that NASA provides an API, I wrote this small program.
 
 ## Installation
+For Windows users without Python installed on their operating system,
+please download [this zip archive](https://github.com/arkadiusz-l/moon-visualization-images-downloader/releases/download/v1.0.1/moon-visualization-images-downloader.zip)
+with the EXE file inside.
+
+For users/developers with Python installed:\
 3 options to choose from:
 #### I. PyCharm or IntelliJ IDEA with the "Python Community Edition" plugin
 1. Create a New Project with the virtual environment, for example **Virtualenv**.
