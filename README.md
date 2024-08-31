@@ -1,9 +1,12 @@
 # Moon Visualization Images Downloader
 I'm writing this small program in order to improve my programming skills.\
-It uses [requests](https://requests.readthedocs.io/en/latest/) to connect with API,
-[logging](https://docs.python.org/3/library/logging.html) for additional debug information,
-[tqdm](https://tqdm.github.io/) for file download progress bar.\
-I also used [Pytest](https://docs.pytest.org/) for testing.
+I used:
+* [requests](https://requests.readthedocs.io/en/latest/) to connect with API,
+* [logging](https://docs.python.org/3/library/logging.html) for additional debug information,
+* [tqdm](https://tqdm.github.io/) for file download progress bar,
+* [Pytest](https://docs.pytest.org/) for testing.
+
+I also used [Nuitka](https://nuitka.net/) compiler to create EXE.
 
 ## Description
 This program runs on the terminal/command-line and is used to download visualization images of the Moon
@@ -19,131 +22,10 @@ Previously, I downloaded this images manually from the
 that NASA provides an API, I wrote this small program.
 
 ## Installation
-For Windows users without Python installed on their operating system,
-please download [this zip archive](https://github.com/arkadiusz-l/moon-visualization-images-downloader/releases/download/v1.0.1/moon-visualization-images-downloader.zip)
+Clone this repository or download the source code in .zip archive.\
+For Windows users without Python installed,
+please download [latest release](https://github.com/arkadiusz-l/moon-visualization-images-downloader/releases/latest)
 with the EXE file inside.
-
-For users/developers with Python installed:\
-3 options to choose from:
-#### I. PyCharm or IntelliJ IDEA with the "Python Community Edition" plugin
-1. Create a New Project with the virtual environment, for example **Virtualenv**.
-2. Open the IDE terminal.
-3. Type:
-   ```
-   git clone git@github.com:arkadiusz-l/moon-visualization-images-downloader.git
-   ```
-   or
-   ```
-   git clone https://github.com/arkadiusz-l/moon-visualization-images-downloader.git
-   ```
-4. Navigate to the program's directory by typing:
-   ```
-   cd moon-visualization-images-downloader
-   ```
-5. Make sure that you are inside the virtual environment - you should see `(venv)` before the path.
-6. Type:
-   ```
-   pip install -r requirements.txt
-   ```
-   to install the required dependencies necessary for the program to run.
-7. Now you can run the program by typing:
-   ```
-   python main.py
-   ```
-8. After using the program, exit the virtual environment by typing:
-   ```
-   deactivate
-   ```
-9. The `(venv)` should disappear.
-
-#### II. Downloading release
-1. Download the [latest release](https://github.com/arkadiusz-l/moon-visualization-images-downloader/releases/latest)
-   in a .zip archive.
-2. Unpack the downloaded archive in a directory of your choice.
-3. Open the terminal.
-4. Navigate to the directory with the unpacked program by typing:
-   ```
-   cd directoryname
-   ```
-5. Type:
-   ```
-   python -m venv venv
-   ```
-   to create virtual environment and wait for confirmation.
-6. If you are on Windows, type:
-   ```
-   venv\Scripts\activate
-   ```
-   If you are on Linux or macOS, type:
-   ```
-   source venv/bin/activate
-   ```
-7. Make sure that you are inside the virtual environment - you should see `(venv)` before the path.
-8. Type:
-   ```
-   pip install -r requirements.txt
-   ```
-   to install the required dependencies necessary for the program to run.
-9. Now you can run the program by typing:
-   ```
-   python main.py
-   ```
-10. After using the program, exit the virtual environment by typing:
-    ```
-    deactivate
-    ```
-11. The `(venv)` should disappear.
-
-#### III. Cloning repository
-1. Open the terminal.
-2. Create a new directory by typing:
-   ```
-   mkdir directoryname
-   ```
-3. Navigate to that directory by typing:
-   ```
-   cd directoryname
-   ```
-4. Type:
-   ```
-   git clone git@github.com:arkadiusz-l/moon-visualization-images-downloader.git
-   ```
-   or
-   ```
-   git clone https://github.com/arkadiusz-l/moon-visualization-images-downloader.git
-   ```
-5. Navigate to the program's directory by typing:
-   ```
-   cd moon-visualization-images-downloader
-   ```
-6. Type:
-   ```
-   python -m venv venv
-   ```
-   to create virtual environment and wait for confirmation.
-7. If you are on Windows, type:
-   ```
-   venv\Scripts\activate
-   ```
-   If you are on Linux or macOS, type:
-   ```
-   source venv/bin/activate
-   ```
-8. Make sure that you are inside the virtual environment - you should see `(venv)` before the path.
-9. Type:
-   ```
-   pip install -r requirements.txt
-   ```
-   to install the required dependencies necessary for the program to run.
-10. Now you can run the program by typing:
-    ```
-    python main.py
-    ```
-11. After using the program, exit the virtual environment by typing:
-    ```
-    deactivate
-    ```
-12. The `(venv)` should disappear.
 
 ## Usage
 The program will ask you the following things:
