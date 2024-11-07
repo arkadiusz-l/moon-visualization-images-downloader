@@ -5,6 +5,7 @@ import logging
 from typing import Tuple
 from datetime import datetime, timedelta, timezone
 import requests
+import urllib3
 from tqdm import tqdm
 
 
