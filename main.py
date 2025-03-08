@@ -4,7 +4,7 @@ import json
 import logging
 from typing import Tuple
 from datetime import datetime, timedelta, timezone
-from PIL import Image
+from PIL import Image, ImageOps
 import urllib3
 import requests
 from tqdm import tqdm
@@ -165,10 +165,21 @@ def crop_image(image_path, output_path, crop_size):
         right = left + crop_width
         bottom = top + crop_height
         cropped_img = img.crop((left, top, right, bottom))
-        cropped_img.convert("RGB").save(output_path, "JPEG")
+        converted_image = cropped_img.convert("RGB")
+        converted_image.save(output_path, "JPEG")
         print(f"Image cropped: {output_path}")
+        return converted_image
     except Exception as error:
         print(f"An error occurred during cropping image {image_path}: {error}")
+
+
+def mirror_image(cropped_image, output_path):
+    try:
+        img_mirror = ImageOps.mirror(cropped_image)
+        img_mirror.save(output_path)
+        print(f"Image mirrored: {output_path}")
+    except Exception as error:
+        print(f"An error occurred during mirroring image: {error}")
 
 
 def process_images(input_dir, output_dir, crop_size):
@@ -180,7 +191,9 @@ def process_images(input_dir, output_dir, crop_size):
                 continue
             image_path = os.path.join(input_dir, image_filename)
             output_filename = os.path.join(output_dir, os.path.splitext(image_filename)[0] + ".jpg")
-            crop_image(image_path=image_path, output_path=output_filename, crop_size=crop_size)
+            cropped_image = crop_image(image_path=image_path, output_path=output_filename, crop_size=crop_size)
+            if cropped_image:
+                mirror_image(cropped_image=cropped_image, output_path=os.path.join(output_dir, os.path.splitext(image_filename)[0] + "-m" + ".jpg"))
     except Exception as error:
         print(f"An error occurred during processing images: {error}")
 
@@ -213,5 +226,5 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         sys.exit("The program has been stopped by user.")
-    except Exception as error:
-        sys.exit(error)
+    # except Exception as error:
+    #     sys.exit(error)
