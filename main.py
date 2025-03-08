@@ -4,8 +4,9 @@ import json
 import logging
 from typing import Tuple
 from datetime import datetime, timedelta, timezone
-import requests
+from PIL import Image
 import urllib3
+import requests
 from tqdm import tqdm
 
 
@@ -151,6 +152,39 @@ def download_images() -> int:
         print(f"{downloaded} files downloaded!")
 
 
+def crop_image(image_path, output_path, crop_size):
+    try:
+        img = Image.open(image_path)
+        img_width, img_height = img.size
+        crop_width, crop_height = crop_size
+        if img_width < crop_width or img_height < crop_height:
+            print(f"Image {image_path} is too small! ({img_width}x{img_height})")
+            return
+        left = (img_width - crop_width) // 2
+        top = (img_height - crop_height) // 2
+        right = left + crop_width
+        bottom = top + crop_height
+        cropped_img = img.crop((left, top, right, bottom))
+        cropped_img.convert("RGB").save(output_path, "JPEG")
+        print(f"Image cropped: {output_path}")
+    except Exception as error:
+        print(f"An error occurred during cropping image {image_path}: {error}")
+
+
+def process_images(input_dir, output_dir, crop_size):
+    try:
+        os.makedirs(output_dir, exist_ok=True)
+        images = os.listdir(input_dir)
+        for image_filename in images:
+            if not image_filename.lower().endswith((".tif", ".tiff")):
+                continue
+            image_path = os.path.join(input_dir, image_filename)
+            output_filename = os.path.join(output_dir, os.path.splitext(image_filename)[0] + ".jpg")
+            crop_image(image_path=image_path, output_path=output_filename, crop_size=crop_size)
+    except Exception as error:
+        print(f"An error occurred during processing images: {error}")
+
+
 if __name__ == "__main__":
     logging_level = logging.INFO
     if len(sys.argv) > 1:
@@ -172,6 +206,11 @@ if __name__ == "__main__":
             download_images()
             print("Done.")
             os.startfile(download_dir)
+
+        crop_choice = input("Would you like to crop images? ")
+        if crop_choice == "y":
+            process_images(input_dir=download_dir, output_dir=download_dir, crop_size=(2900, 2900))
+
     except KeyboardInterrupt:
         sys.exit("The program has been stopped by user.")
     except Exception as error:
