@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 import pytest
 
-from main import (get_hour_from_user, get_filepath, get_image_url_from_api, parse_user_date,
-                  convert_user_date_and_hour_to_utc, get_image_url_from_api, HourValueError, DateOutOfRangeError)
+from main import (get_hour_from_user, create_filepath, parse_user_date, convert_user_date_and_hour_to_utc,
+                  get_image_url_from_api, HourValueError, DateOutOfRangeError)
 
 
 @pytest.fixture
@@ -73,17 +73,19 @@ def test_parse_user_date_invalid_value():
 
 def test_get_filepath_one_digit_hour():
     homepath = environ.get("HOMEPATH")
+    extension = "tif"
     date = "2024-04-08"
     hour = "1"
-    filepath = get_filepath(homepath, date, hour)
+    filepath = create_filepath(homepath, extension, date, hour)
     assert filepath == f"{homepath}\\2024-04-08T01L.tif"
 
 
 def test_get_filepath_two_digit_hour():
     homepath = environ.get("HOMEPATH")
+    extension = "tif"
     date = "2024-04-08"
     hour = "16"
-    filepath = get_filepath(homepath, date, hour)
+    filepath = create_filepath(homepath, extension, date, hour)
     assert filepath == f"{homepath}\\2024-04-08T16L.tif"
 
 
