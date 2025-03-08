@@ -2,7 +2,6 @@ import os
 import sys
 import json
 import logging
-from typing import Tuple
 from datetime import datetime, timedelta, timezone
 from PIL import Image, ImageOps
 import urllib3
@@ -81,8 +80,8 @@ def download_image(url: str, path: str) -> None:
     print(f"The image has been saved in {path}.")
 
 
-def get_filepath(download_dir: str, date: str, hour: str) -> str:
-    filename = f"{date}T0{hour}L.tif" if len(hour) < 2 else f"{date}T{hour}L.tif"
+def create_filepath(download_dir: str, extension: str, date: str, hour: str) -> str:
+    filename = f"{date}T0{hour}L.{extension}" if len(hour) < 2 else f"{date}T{hour}L.{extension}"
     filepath = os.path.join(download_dir, filename)
     logging.debug(f"{filepath=}")
     return filepath
@@ -100,10 +99,11 @@ def get_date_from_user() -> str:
         except ValueError:
             print("\nThe date is not valid! Please enter a valid date.\n")
             continue
+        print(f"\nYou selected the date: {date}")
         return date
 
 
-def get_hours_from_user() -> Tuple[int, int]:
+def get_hours_from_user() -> tuple[int, int]:
     hour_value_error_message = "\nPlease enter a value between 0 and 23.\n"
     while True:
         try:
@@ -130,35 +130,37 @@ def download_images() -> int:
             user_hour = str(user_hour)
             utc_date = convert_user_date_and_hour_to_utc(date=date, hour=user_hour)
             url = get_image_url_from_api(api="https://svs.gsfc.nasa.gov/api/dialamoon", date=utc_date)
-            filepath = get_filepath(
+            filepath = create_filepath(
                 download_dir=os.path.abspath(
                     os.path.join(os.environ.get("HOMEPATH"), "Downloads", "Moon Visualizations")
                 ),
+                extension="tif",
                 date=date,
                 hour=user_hour
             )
             download_image(url=url, path=filepath)
             downloaded += 1
-        return downloaded
     except DateOutOfRangeError:
         print(f"The date and time must be between 2011-01-01 00:00 UTC and {datetime.now().year}-12-31 23:00 UTC.")
     except requests.exceptions.SSLError:
         sys.exit("SSL certificate verify failed!")
     except requests.exceptions.ConnectionError:
         sys.exit("API did not respond! Check API URL or network connection!")
-    except requests.exceptions.ChunkedEncodingError or urllib3.exceptions.ProtocolError:
+    except (requests.exceptions.ChunkedEncodingError, urllib3.exceptions.ProtocolError):
         sys.exit("Connection aborted! Check your network connection!")
     finally:
         print(f"{downloaded} files downloaded!")
+        return downloaded
 
 
-def crop_image(image_path, output_path, crop_size):
+def crop_image(filename: str, crop_size: tuple[int, int]) -> Image:
     try:
+        image_path = os.path.join(download_dir, filename)
         img = Image.open(image_path)
         img_width, img_height = img.size
         crop_width, crop_height = crop_size
         if img_width < crop_width or img_height < crop_height:
-            print(f"Image {image_path} is too small! ({img_width}x{img_height})")
+            print(f"Image {filename} is too small! ({img_width}x{img_height})")
             return
         left = (img_width - crop_width) // 2
         top = (img_height - crop_height) // 2
@@ -166,34 +168,31 @@ def crop_image(image_path, output_path, crop_size):
         bottom = top + crop_height
         cropped_img = img.crop((left, top, right, bottom))
         converted_image = cropped_img.convert("RGB")
-        converted_image.save(output_path, "JPEG")
-        print(f"Image cropped: {output_path}")
+        output_filename = os.path.splitext(filename)[0] + ".jpg"
+        converted_image.save(os.path.join(download_dir, output_filename), "JPEG")
+        print(f"Saved cropped image: {output_filename}")
         return converted_image
     except Exception as error:
-        print(f"An error occurred during cropping image {image_path}: {error}")
+        print(f"An error occurred during cropping image {filename}: {error}")
 
 
-def mirror_image(cropped_image, output_path):
+def mirror_image(cropped_image: Image, filename: str) -> None:
     try:
-        img_mirror = ImageOps.mirror(cropped_image)
-        img_mirror.save(output_path)
-        print(f"Image mirrored: {output_path}")
+        mirrored_img = ImageOps.mirror(cropped_image)
+        output_filename = os.path.splitext(filename)[0] + "-m.jpg"
+        mirrored_img.save(os.path.join(download_dir, output_filename))
+        print(f"Saved mirrored image: {output_filename}")
     except Exception as error:
-        print(f"An error occurred during mirroring image: {error}")
+        print(f"An error occurred during mirroring image {filename}: {error}")
 
 
-def process_images(input_dir, output_dir, crop_size):
+def process_images() -> None:
     try:
-        os.makedirs(output_dir, exist_ok=True)
-        images = os.listdir(input_dir)
-        for image_filename in images:
-            if not image_filename.lower().endswith((".tif", ".tiff")):
-                continue
-            image_path = os.path.join(input_dir, image_filename)
-            output_filename = os.path.join(output_dir, os.path.splitext(image_filename)[0] + ".jpg")
-            cropped_image = crop_image(image_path=image_path, output_path=output_filename, crop_size=crop_size)
+        images = [file for file in os.listdir(download_dir) if file.lower().endswith((".tif", ".tiff"))]
+        for filename in images:
+            cropped_image = crop_image(filename=filename, crop_size=(2900, 2900))
             if cropped_image:
-                mirror_image(cropped_image=cropped_image, output_path=os.path.join(output_dir, os.path.splitext(image_filename)[0] + "-m" + ".jpg"))
+                mirror_image(cropped_image=cropped_image, filename=filename)
     except Exception as error:
         print(f"An error occurred during processing images: {error}")
 
@@ -214,17 +213,14 @@ if __name__ == "__main__":
     try:
         date = get_date_from_user()
         user_start_hour, user_end_hour = get_hours_from_user()
-        choice = input(f"{user_end_hour - user_start_hour + 1} file(s) will be downloaded. Enter 'y' if continue: ")
+        number_of_images = user_end_hour - user_start_hour + 1
+        choice = input(f"{number_of_images} image(s) will be downloaded. Enter 'y' if continue: ")
         if choice == "y":
             download_images()
             print("Done.")
             os.startfile(download_dir)
-
-        crop_choice = input("Would you like to crop images? ")
+        crop_choice = input("Would you like to crop and mirror images? ")
         if crop_choice == "y":
-            process_images(input_dir=download_dir, output_dir=download_dir, crop_size=(2900, 2900))
-
+            process_images()
     except KeyboardInterrupt:
         sys.exit("The program has been stopped by user.")
-    # except Exception as error:
-    #     sys.exit(error)
